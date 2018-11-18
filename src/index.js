@@ -5,10 +5,12 @@ import { random } from 'lodash';
 const X_MAX = 400;
 const Y_MAX = 400;
 
-const randomPoints = range(0, 100).map(x => ({
+const generatePoints = (num) => range(0, num).map(_ => ({
   x: random(0, X_MAX, true),
   y: random(0, Y_MAX, true)
 }));
+
+const randomPoints = generatePoints(100);
 
 
 const randomWeights = ({
@@ -24,43 +26,35 @@ const guess = (weights, point) => {
   return team;
 };
 
-const testTrain = () => {
-  const point = { x: 200, y: 400 };
-  return train(randomWeights, point, team(point));
-}
+// const testTrain = () => {
+//   const point = { x: 200, y: 400 };
+//   return train(randomWeights, point, team(point));
+// }
 
 function train(weights, point, actualTeam) {
   const guessResult = guess(weights, point);
   const error = actualTeam - guessResult;
+  const learningRate = 0.1;
   return {
-    x: weights.x + (point.x * error),
-    y: weights.y + (point.y * error)
+    x: weights.x + (point.x * error * learningRate),
+    y: weights.y + (point.y * error * learningRate)
   }
 }
 
-const testGuess = guess(randomWeights, {x: 300, y: 400});
+// const testGuess = guess(randomWeights, {x: 300, y: 400});
 
 const trainedWeights = () => {
-  const ex1 = { x: 721, y: 432 };
-  const ex2 = { x: 211, y: 122 };
-  const ex3 = { x: 328, y: 833 };
-  const ex4 = { x: 900, y: 400 };
-  const ex5 = { x: 21, y: 32 };
-  const ex6 = { x: 511, y: 2 };
-  const ex7 = { x: 128, y: 733 };
-  const ex8 = { x: 900, y: 4 };
-  let newWeights;
+  const examples = generatePoints(10000).map(point => ({
+    point,
+    team: team(point)
+  }));
 
-  newWeights = train(randomWeights, ex1, team(ex1));
-  newWeights = train(newWeights, ex2, team(ex2));
-  newWeights = train(newWeights, ex3, team(ex3));
-  newWeights = train(newWeights, ex4, team(ex4));
-  newWeights = train(newWeights, ex5, team(ex5));
-  newWeights = train(newWeights, ex6, team(ex6));
-  newWeights = train(newWeights, ex7, team(ex7));
-  newWeights = train(newWeights, ex8, team(ex8));
+  let currentWeights = randomWeights;
+  for (const example of examples) {
+    currentWeights = train(currentWeights, example.point, example.team);
+  }
 
-  return newWeights;
+  return currentWeights;
 };
 
 
